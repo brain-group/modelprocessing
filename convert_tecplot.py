@@ -16,6 +16,7 @@ import h5py
 import glob
 import sys
 import getopt
+import os
 #from general_functions import *
 
 #Multi-fluid/chuanfei things
@@ -31,7 +32,7 @@ data_conversion = {'H_p1_number_density':lambda x: x/1.00794,
 #                   'O_p1_number_density':lambda x: x/15.9994, 
 #                   'CO2_p1_number_density':lambda x: x/(15.9994*2+12.0107),
 #                   }
-f_var_rename = '/Users/Everding/Library/PythonThings/modelprocessing/misc/name_conversion.txt'
+f_var_rename = os.path.dirname(__file__)+'/misc/name_conversion.txt'
 
 
 def convert_file(fname, h5_name):
@@ -72,20 +73,23 @@ def convert_file(fname, h5_name):
             if "AUXDATA TIMESIMSHORT" in l: read_header = False
 
         dat_vars = [v.replace('"', '').replace('\n','') for v in dat_vars]
-
+        Nvars = len(dat_vars)
         # Setup empty data structure
         data = {var:np.empty(N, dtype=float) for var in dat_vars}
 
         # Iterate through the data
-        for i, line in enumerate(dat_file):
+        i=0
+        for line in dat_file:
             line_dat = line.split(' ')
             line_dat = list(filter(None, line_dat))
+            if len(line_dat) != Nvars: continue
             for j, key in enumerate(dat_vars):
                 data[key][i] = float(line_dat[j])
 
             # There are bonus garbage lines at the end so we have to
             # manually exit the loop
             if i == N-1: break
+            i+=1
 
                 
 
